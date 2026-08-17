@@ -68,3 +68,21 @@ public:
         return -1;
     }
 };
+class NegativeGroupNode : public RegexNode
+{
+    std::string non_allowed_characters;
+
+public:
+    explicit NegativeGroupNode(std::string chars) : non_allowed_characters(std::move(chars)) {}
+
+    int match(std::string_view text) const override
+    {
+        if (text.empty())
+            return -1;
+        if (non_allowed_characters.find(text[0]) == std::string::npos)
+        {
+            return 1;
+        }
+        return -1;
+    }
+};

@@ -33,16 +33,32 @@ ParsedRegex parse_pattern(std::string_view pattern)
         }
         else if (c == '[')
         {
-            std::string group_chars = "";
-            i++;
-            while (i < pattern.length() && pattern[i] != ']')
-            {
-                group_chars += pattern[i];
-                i++;
-            }
 
-            std::cerr << "[DEBUG] Parsed Positive Group: [" << group_chars << "]" << std::endl;
-            regex.nodes.push_back(std::make_unique<PositiveGroupNode>(group_chars));
+            std::string group_chars = "";
+            if (pattern[i + 1] == '^')
+            {
+                i += 2; // skip ^ as well
+                while (i < pattern.length() && pattern[i] != ']')
+                {
+                    group_chars += pattern[i];
+                    i++;
+                }
+
+                std::cerr << "[DEBUG] Parsed Negative Group: [" << group_chars << "]" << std::endl;
+                regex.nodes.push_back(std::make_unique<PositiveGroupNode>(group_chars));
+            }
+            else
+            {
+                i++; // skip only [
+                while (i < pattern.length() && pattern[i] != ']')
+                {
+                    group_chars += pattern[i];
+                    i++;
+                }
+
+                std::cerr << "[DEBUG] Parsed Positive Group: [" << group_chars << "]" << std::endl;
+                regex.nodes.push_back(std::make_unique<PositiveGroupNode>(group_chars));
+            }
         }
         else
         {
