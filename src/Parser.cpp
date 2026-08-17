@@ -45,7 +45,7 @@ ParsedRegex parse_pattern(std::string_view pattern)
                 }
 
                 std::cerr << "[DEBUG] Parsed Negative Group: [" << group_chars << "]" << std::endl;
-                regex.nodes.push_back(std::make_unique<PositiveGroupNode>(group_chars));
+                regex.nodes.push_back(std::make_unique<NegativeGroupNode>(group_chars));
             }
             else
             {
