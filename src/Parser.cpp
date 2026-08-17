@@ -16,6 +16,13 @@ ParsedRegex parse_pattern(std::string_view pattern)
             continue; // Move to the next character without making a node
         }
 
+        if (c == '$' && i == pattern.length() - 1)
+        {
+            regex.context.has_end_anchor = true;
+            std::cerr << "[DEBUG] Parsed End Anchor: $" << std::endl;
+            continue; // Skip creating a node
+        }
+
         if (c == '\\')
         {
             if (i + 1 < pattern.length())

@@ -6,6 +6,10 @@ static bool match_nodes(const ParsedRegex &regex, size_t node_idx, std::string_v
     // Base case
     if (node_idx == regex.nodes.size())
     {
+        if (regex.context.has_end_anchor)
+        {
+            return text.empty();
+        }
         return true;
     }
 
