@@ -1,20 +1,14 @@
 #include <iostream>
 #include <string>
-
-bool match_pattern(const std::string& input_line, const std::string& pattern) {
-    if (pattern.length() == 1) {
-        return input_line.find(pattern) != std::string::npos;
-    } else {
-        throw std::runtime_error("Unhandled pattern " + pattern);
-    }
-}
+#include <stdexcept>
+#include "Parser.h"
+#include "Matcher.h"
 
 int main(int argc, char* argv[]) {
     // Flush after every std::cout / std::cerr
     std::cout << std::unitbuf;
     std::cerr << std::unitbuf;
 
-    // You can use print statements as follows for debugging, they'll be visible when running tests.
     std::cerr << "Logs from your program will appear here" << std::endl;
 
     if (argc != 3) {
@@ -34,13 +28,15 @@ int main(int argc, char* argv[]) {
     std::getline(std::cin, input_line);
     
     try {
-        if (match_pattern(input_line, pattern)) {
-            return 0;
+        ParsedRegex regex = parse_pattern(pattern);
+        
+        if (is_match(regex, input_line)) {
+            return 0; // Grep expects 0 on match
         } else {
-            return 1;
+            return 1; // Grep expects 1 on no match
         }
-    } catch (const std::runtime_error& e) {
-        std::cerr << e.what() << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "Runtime Error: " << e.what() << std::endl;
         return 1;
     }
 }
