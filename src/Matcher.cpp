@@ -1,16 +1,19 @@
 #include "Matcher.h"
 
 // Helper function to recursively traverse the AST
-static bool match_nodes(const ParsedRegex& regex, size_t node_idx, std::string_view text) {
+static bool match_nodes(const ParsedRegex &regex, size_t node_idx, std::string_view text)
+{
     // Base case
-    if (node_idx == regex.nodes.size()) {
-        return true; 
+    if (node_idx == regex.nodes.size())
+    {
+        return true;
     }
 
     // Try to match the current node against the start of the text
     int consumed = regex.nodes[node_idx]->match(text);
-    
-    if (consumed != -1) {
+
+    if (consumed != -1)
+    {
         text.remove_prefix(consumed);
         return match_nodes(regex, node_idx + 1, text);
     }
@@ -18,9 +21,12 @@ static bool match_nodes(const ParsedRegex& regex, size_t node_idx, std::string_v
     return false; // Match failed
 }
 
-bool is_match(const ParsedRegex& regex, std::string_view text) {
-    for (size_t i = 0; i <= text.length(); ++i) {
-        if (match_nodes(regex, 0, text.substr(i))) {
+bool is_match(const ParsedRegex &regex, std::string_view text)
+{
+    for (size_t i = 0; i <= text.length(); ++i)
+    {
+        if (match_nodes(regex, 0, text.substr(i)))
+        {
             return true;
         }
     }

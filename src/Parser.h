@@ -5,7 +5,8 @@
 #include "RegexNode.h"
 #include "MatchContext.h"
 
-struct ParsedRegex {
+struct ParsedRegex
+{
     std::vector<std::unique_ptr<RegexNode>> nodes;
     MatchContext context;
 };

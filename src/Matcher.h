@@ -3,4 +3,4 @@
 #include "Parser.h"
 
 // Evaluates the AST against the input text
-bool is_match(const ParsedRegex& regex, std::string_view text);
+bool is_match(const ParsedRegex &regex, std::string_view text);
