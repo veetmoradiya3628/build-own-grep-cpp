@@ -29,7 +29,11 @@ public:
 class WordNode: public RegexNode {
 public:
     int match(std::string_view text) const override {
-        if(!text.empty() && (std::isalnum(text[0] || text[0] == '_'))) return 1;
+        if(text.empty()) return -1;
+
+        char c = text[0];
+        bool is_word = (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || (c == '_');
+        if (is_word) return 1;
         return -1;
     }
 };
