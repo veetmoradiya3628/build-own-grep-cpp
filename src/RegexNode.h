@@ -5,7 +5,7 @@ class RegexNode {
 public:
     virtual ~RegexNode() = default;
     virtual int match(std::string_view text) const = 0;
-}
+};
 
 class LiteralNode: public RegexNode {
     char target;
@@ -16,7 +16,7 @@ public:
         if(!text.empty() && text[0] == target) return 1;
         return -1;
     }
-}
+};
 
 class DigitNode: public RegexNode {
 public:
@@ -24,4 +24,4 @@ public:
         if (!text.empty() && std::isdigit(text[0])) return 1;
         return -1;
     }
-}
+};
