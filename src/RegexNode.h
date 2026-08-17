@@ -25,3 +25,11 @@ public:
         return -1;
     }
 };
+
+class WordNode: public RegexNode {
+public:
+    int match(std::string_view text) const override {
+        if(!text.empty() && (std::isalnum(text[0] || text[0] == '_'))) return 1;
+        return -1;
+    }
+};

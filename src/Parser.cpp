@@ -10,6 +10,8 @@ ParsedRegex parse_pattern(std::string_view pattern) {
                 char next_c = pattern[++i];
                 if (next_c == 'd') {
                     regex.nodes.push_back(std::make_unique<DigitNode>());
+                } else if (next_c == 'w'){
+                    regex.nodes.push_back(std::make_unique<WordNode>());
                 } else {
                     regex.nodes.push_back(std::make_unique<LiteralNode>(next_c));
                 }
