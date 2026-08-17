@@ -8,6 +8,14 @@ ParsedRegex parse_pattern(std::string_view pattern)
     for (size_t i = 0; i < pattern.length(); ++i)
     {
         char c = pattern[i];
+
+        if (c == '^' && i == 0)
+        {
+            regex.context.has_start_anchor = true;
+            std::cerr << "[DEBUG] Parsed Start Anchor: ^" << std::endl;
+            continue; // Move to the next character without making a node
+        }
+
         if (c == '\\')
         {
             if (i + 1 < pattern.length())
