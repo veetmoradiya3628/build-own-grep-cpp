@@ -18,7 +18,6 @@ static bool match_nodes(const ParsedRegex &regex, size_t node_idx, std::string_v
     {
         int total_consumed = 0;
         std::string_view current_text = text;
-
         std::vector<int> match_lengths;
 
         while (true)
@@ -26,7 +25,6 @@ static bool match_nodes(const ParsedRegex &regex, size_t node_idx, std::string_v
             int consumed = node->match(current_text);
             if (consumed == -1 || consumed == 0)
                 break; // Stop when the node no longer matches
-
             match_lengths.push_back(consumed);
             total_consumed += consumed;
             current_text.remove_prefix(consumed);
@@ -43,12 +41,23 @@ static bool match_nodes(const ParsedRegex &regex, size_t node_idx, std::string_v
             {
                 return true; // We successfully finished the regex!
             }
-
             total_consumed -= match_lengths.back();
             match_lengths.pop_back();
         }
 
         return false;
+    }
+    else if (node->quantifier == Quantifier::ZeroOrOne)
+    {
+        int consumed = node->match(text);
+        if (consumed != -1)
+        {
+            if (match_nodes(regex, node_idx + 1, text.substr(consumed)))
+            {
+                return true;
+            }
+        }
+        return match_nodes(regex, node_idx + 1, text);
     }
     else
     {
@@ -69,7 +78,6 @@ bool is_match(const ParsedRegex &regex, std::string_view text)
     {
         return match_nodes(regex, 0, text);
     }
-
     for (size_t i = 0; i <= text.length(); ++i)
     {
         if (match_nodes(regex, 0, text.substr(i)))

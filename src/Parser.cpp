@@ -23,12 +23,30 @@ ParsedRegex parse_pattern(std::string_view pattern)
             continue; // Skip creating a node
         }
 
-        if (c == '+') {
-            if (!regex.nodes.empty()) {
+        if (c == '+')
+        {
+            if (!regex.nodes.empty())
+            {
                 regex.nodes.back()->quantifier = Quantifier::OneOrMore;
                 std::cerr << "[DEBUG] Applied '+' quantifier to previous node" << std::endl;
-            } else {
+            }
+            else
+            {
                 std::cerr << "[DEBUG] Error: '+' with no preceding character" << std::endl;
+            }
+            continue;
+        }
+
+        if (c == '?')
+        {
+            if (!regex.nodes.empty())
+            {
+                regex.nodes.back()->quantifier = Quantifier::ZeroOrOne;
+                std::cerr << "[DEBUG] Applied '?' quantifier to previous node" << std::endl;
+            }
+            else
+            {
+                std::cerr << "[DEBUG] Error: '?' with no preceding character" << std::endl;
             }
             continue;
         }

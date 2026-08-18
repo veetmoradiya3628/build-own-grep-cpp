@@ -4,7 +4,8 @@
 
 enum class Quantifier {
     None,
-    OneOrMore
+    OneOrMore,
+    ZeroOrOne
 };
 
 class RegexNode
