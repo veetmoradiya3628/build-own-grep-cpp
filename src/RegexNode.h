@@ -13,8 +13,11 @@ class RegexNode
 {
 public:
     Quantifier quantifier = Quantifier::None;
+
     virtual ~RegexNode() = default;
     virtual int match(std::string_view text) const = 0;
+
+    virtual bool is_alternation() const { return false; }
 };
 
 class LiteralNode : public RegexNode
@@ -95,7 +98,6 @@ public:
         return -1;
     }
 };
-// Stage: Wildcard (.)
 class WildcardNode : public RegexNode
 {
 public:
@@ -107,4 +109,20 @@ public:
         }
         return -1;
     }
+};
+class AlternationNode : public RegexNode
+{
+public:
+    // Holds the compiled AST for every branch separated by |
+    std::vector<std::vector<std::unique_ptr<RegexNode>>> branches;
+
+    explicit AlternationNode(std::vector<std::vector<std::unique_ptr<RegexNode>>> b)
+        : branches(std::move(b)) {}
+
+    int match(std::string_view text) const override
+    {
+        return -1; // Handled specially by the evaluator
+    }
+
+    bool is_alternation() const override { return true; }
 };

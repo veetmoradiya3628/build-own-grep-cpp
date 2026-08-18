@@ -74,6 +74,66 @@ ParsedRegex parse_pattern(std::string_view pattern)
                 regex.nodes.push_back(std::make_unique<LiteralNode>('\\'));
             }
         }
+        else if (c == '(')
+        {
+            std::string inner = "";
+            i++;
+            int paren_count = 1;
+            while (i < pattern.length() && paren_count > 0)
+            {
+                if (pattern[i] == '(')
+                    paren_count++;
+                else if (pattern[i] == ')')
+                    paren_count--;
+
+                if (paren_count > 0)
+                    inner += pattern[i];
+                i++;
+            }
+            i--; // Adjust index because the main for-loop will increment it
+
+            std::vector<std::string> branch_strs;
+            std::string current_branch = "";
+            int nested_parens = 0;
+
+            for (char bc : inner)
+            {
+                if (bc == '(')
+                    nested_parens++;
+                else if (bc == ')')
+                    nested_parens--;
+
+                if (bc == '|' && nested_parens == 0)
+                {
+                    branch_strs.push_back(current_branch);
+                    current_branch = "";
+                }
+                else
+                {
+                    current_branch += bc;
+                }
+            }
+            branch_strs.push_back(current_branch);
+
+            if (branch_strs.size() > 1)
+            {
+                std::vector<std::vector<std::unique_ptr<RegexNode>>> compiled_branches;
+                for (const auto &b_str : branch_strs)
+                {
+                    compiled_branches.push_back(std::move(parse_pattern(b_str).nodes)); // Recursive compiling!
+                }
+                regex.nodes.push_back(std::make_unique<AlternationNode>(std::move(compiled_branches)));
+                std::cerr << "[DEBUG] Parsed Alternation with " << branch_strs.size() << " branches" << std::endl;
+            }
+            else
+            {
+                ParsedRegex inner_regex = parse_pattern(inner);
+                for (auto &n : inner_regex.nodes)
+                {
+                    regex.nodes.push_back(std::move(n));
+                }
+            }
+        }
         else if (c == '[')
         {
 
