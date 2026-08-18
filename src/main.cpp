@@ -6,17 +6,26 @@
 
 int main(int argc, char *argv[])
 {
-    // Flush after every std::cout / std::cerr
     std::cout << std::unitbuf;
     std::cerr << std::unitbuf;
 
-    if (argc != 3 || std::string(argv[1]) != "-E")
+    bool only_matching = false;
+    std::string pattern;
+
+    if (argc == 4 && std::string(argv[1]) == "-o" && std::string(argv[2]) == "-E")
     {
-        std::cerr << "Usage: ./your_program.sh -E <pattern>" << std::endl;
+        only_matching = true;
+        pattern = argv[3];
+    }
+    else if (argc == 3 && std::string(argv[1]) == "-E")
+    {
+        pattern = argv[2];
+    }
+    else
+    {
+        std::cerr << "Usage: ./your_program.sh [-o] -E <pattern>" << std::endl;
         return 1;
     }
-
-    std::string pattern = argv[2];
 
     try
     {
@@ -27,11 +36,35 @@ int main(int argc, char *argv[])
 
         while (std::getline(std::cin, input_line))
         {
+            std::string_view match;
 
-            if (is_match(regex, input_line))
+            if (only_matching)
             {
-                std::cout << input_line << std::endl;
-                found_any_match = true;
+                std::string_view remaining = input_line;
+                bool line_had_match = false;
+
+                while (!remaining.empty() && find_match(regex, remaining, match))
+                {
+                    std::cout << match << std::endl;
+                    line_had_match = true;
+
+                    size_t match_start_idx = match.data() - remaining.data();
+                    size_t characters_to_advance = (match.length() == 0) ? 1 : match.length();
+                    remaining = remaining.substr(match_start_idx + characters_to_advance);
+                }
+
+                if (line_had_match)
+                {
+                    found_any_match = true;
+                }
+            }
+            else
+            {
+                if (find_match(regex, input_line, match))
+                {
+                    std::cout << input_line << std::endl;
+                    found_any_match = true;
+                }
             }
         }
 

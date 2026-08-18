@@ -91,26 +91,33 @@ static bool match_nodes(
         return false;
     }
 }
-
-bool is_match(const ParsedRegex &regex, std::string_view text)
+bool find_match(const ParsedRegex &regex, std::string_view text, std::string_view &out_match)
 {
+    std::string_view current_attempt;
+
     auto final_continuation = [&](std::string_view remaining_text)
     {
         if (regex.context.has_end_anchor)
         {
-            return remaining_text.empty();
+            if (!remaining_text.empty())
+                return false;
         }
+
+        size_t match_len = current_attempt.length() - remaining_text.length();
+        out_match = current_attempt.substr(0, match_len);
         return true;
     };
 
     if (regex.context.has_start_anchor)
     {
+        current_attempt = text;
         return match_nodes(regex.nodes, 0, text, regex.context, final_continuation);
     }
 
     for (size_t i = 0; i <= text.length(); ++i)
     {
-        if (match_nodes(regex.nodes, 0, text.substr(i), regex.context, final_continuation))
+        current_attempt = text.substr(i); // Save the string view for this attempt
+        if (match_nodes(regex.nodes, 0, current_attempt, regex.context, final_continuation))
         {
             return true;
         }
