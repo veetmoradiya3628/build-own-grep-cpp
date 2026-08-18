@@ -1,9 +1,8 @@
 #include "Matcher.h"
+#include <vector>
 
-// Helper function to recursively traverse the AST
 static bool match_nodes(const ParsedRegex &regex, size_t node_idx, std::string_view text)
 {
-    // Base case
     if (node_idx == regex.nodes.size())
     {
         if (regex.context.has_end_anchor)
@@ -13,16 +12,55 @@ static bool match_nodes(const ParsedRegex &regex, size_t node_idx, std::string_v
         return true;
     }
 
-    // Try to match the current node against the start of the text
-    int consumed = regex.nodes[node_idx]->match(text);
+    const auto &node = regex.nodes[node_idx];
 
-    if (consumed != -1)
+    if (node->quantifier == Quantifier::OneOrMore)
     {
-        text.remove_prefix(consumed);
-        return match_nodes(regex, node_idx + 1, text);
-    }
+        int total_consumed = 0;
+        std::string_view current_text = text;
 
-    return false; // Match failed
+        std::vector<int> match_lengths;
+
+        while (true)
+        {
+            int consumed = node->match(current_text);
+            if (consumed == -1 || consumed == 0)
+                break; // Stop when the node no longer matches
+
+            match_lengths.push_back(consumed);
+            total_consumed += consumed;
+            current_text.remove_prefix(consumed);
+        }
+
+        if (match_lengths.empty())
+        {
+            return false;
+        }
+
+        while (!match_lengths.empty())
+        {
+            if (match_nodes(regex, node_idx + 1, text.substr(total_consumed)))
+            {
+                return true; // We successfully finished the regex!
+            }
+
+            total_consumed -= match_lengths.back();
+            match_lengths.pop_back();
+        }
+
+        return false;
+    }
+    else
+    {
+        // Standard single match logic for nodes with Quantifier::None
+        int consumed = node->match(text);
+        if (consumed != -1)
+        {
+            text.remove_prefix(consumed);
+            return match_nodes(regex, node_idx + 1, text);
+        }
+        return false;
+    }
 }
 
 bool is_match(const ParsedRegex &regex, std::string_view text)
@@ -31,6 +69,7 @@ bool is_match(const ParsedRegex &regex, std::string_view text)
     {
         return match_nodes(regex, 0, text);
     }
+
     for (size_t i = 0; i <= text.length(); ++i)
     {
         if (match_nodes(regex, 0, text.substr(i)))

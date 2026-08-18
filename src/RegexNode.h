@@ -1,9 +1,16 @@
 #pragma once
 #include <string_view>
+#include <string>
+
+enum class Quantifier {
+    None,
+    OneOrMore
+};
 
 class RegexNode
 {
 public:
+    Quantifier quantifier = Quantifier::None;
     virtual ~RegexNode() = default;
     virtual int match(std::string_view text) const = 0;
 };
