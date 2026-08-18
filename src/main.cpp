@@ -10,38 +10,32 @@ int main(int argc, char *argv[])
     std::cout << std::unitbuf;
     std::cerr << std::unitbuf;
 
-    std::cerr << "Logs from your program will appear here" << std::endl;
-
-    if (argc != 3)
+    if (argc != 3 || std::string(argv[1]) != "-E")
     {
-        std::cerr << "Expected two arguments" << std::endl;
+        std::cerr << "Usage: ./your_program.sh -E <pattern>" << std::endl;
         return 1;
     }
 
-    std::string flag = argv[1];
     std::string pattern = argv[2];
-
-    if (flag != "-E")
-    {
-        std::cerr << "Expected first argument to be '-E'" << std::endl;
-        return 1;
-    }
-
-    std::string input_line;
-    std::getline(std::cin, input_line);
 
     try
     {
         ParsedRegex regex = parse_pattern(pattern);
 
-        if (is_match(regex, input_line))
+        std::string input_line;
+        bool found_any_match = false;
+
+        while (std::getline(std::cin, input_line))
         {
-            return 0; // Grep expects 0 on match
+
+            if (is_match(regex, input_line))
+            {
+                std::cout << input_line << std::endl;
+                found_any_match = true;
+            }
         }
-        else
-        {
-            return 1; // Grep expects 1 on no match
-        }
+
+        return found_any_match ? 0 : 1;
     }
     catch (const std::exception &e)
     {
