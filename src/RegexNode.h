@@ -2,7 +2,8 @@
 #include <string_view>
 #include <string>
 
-enum class Quantifier {
+enum class Quantifier
+{
     None,
     OneOrMore,
     ZeroOrOne
@@ -88,6 +89,19 @@ public:
         if (text.empty())
             return -1;
         if (non_allowed_characters.find(text[0]) == std::string::npos)
+        {
+            return 1;
+        }
+        return -1;
+    }
+};
+// Stage: Wildcard (.)
+class WildcardNode : public RegexNode
+{
+public:
+    int match(std::string_view text) const override
+    {
+        if (!text.empty())
         {
             return 1;
         }

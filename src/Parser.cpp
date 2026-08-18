@@ -103,6 +103,11 @@ ParsedRegex parse_pattern(std::string_view pattern)
                 regex.nodes.push_back(std::make_unique<PositiveGroupNode>(group_chars));
             }
         }
+        else if (c == '.')
+        {
+            std::cerr << "[DEBUG] Parsed Wildcard: ." << std::endl;
+            regex.nodes.push_back(std::make_unique<WildcardNode>());
+        }
         else
         {
             regex.nodes.push_back(std::make_unique<LiteralNode>(c));
