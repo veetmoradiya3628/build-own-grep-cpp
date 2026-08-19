@@ -10,20 +10,29 @@ int main(int argc, char *argv[])
     std::cerr << std::unitbuf;
 
     bool only_matching = false;
+    bool use_color = false;
     std::string pattern;
 
-    if (argc == 4 && std::string(argv[1]) == "-o" && std::string(argv[2]) == "-E")
+    for (int i = 1; i < argc; ++i)
     {
-        only_matching = true;
-        pattern = argv[3];
+        std::string arg = argv[i];
+        if (arg == "-o")
+        {
+            only_matching = true;
+        }
+        else if (arg == "--color=always")
+        {
+            use_color = true;
+        }
+        else if (arg == "-E" && i + 1 < argc)
+        {
+            pattern = argv[++i]; // Grab the pattern and increment 'i'
+        }
     }
-    else if (argc == 3 && std::string(argv[1]) == "-E")
+
+    if (pattern.empty())
     {
-        pattern = argv[2];
-    }
-    else
-    {
-        std::cerr << "Usage: ./your_program.sh [-o] -E <pattern>" << std::endl;
+        std::cerr << "Usage: ./your_program.sh [--color=always] [-o] -E <pattern>" << std::endl;
         return 1;
     }
 
@@ -38,32 +47,40 @@ int main(int argc, char *argv[])
         {
             std::string_view match;
 
-            if (only_matching)
+            if (find_match(regex, input_line, match))
             {
-                std::string_view remaining = input_line;
-                bool line_had_match = false;
+                found_any_match = true;
 
-                while (!remaining.empty() && find_match(regex, remaining, match))
+                if (use_color)
                 {
-                    std::cout << match << std::endl;
-                    line_had_match = true;
+                    // C++ Superpower: Pointer arithmetic to find the index of the string_view!
+                    size_t start_idx = match.data() - input_line.data();
+                    size_t match_len = match.length();
 
-                    size_t match_start_idx = match.data() - remaining.data();
-                    size_t characters_to_advance = (match.length() == 0) ? 1 : match.length();
-                    remaining = remaining.substr(match_start_idx + characters_to_advance);
+                    std::cout << input_line.substr(0, start_idx)
+                              << "\033[01;31m"
+                              << match
+                              << "\033[m"
+                              << input_line.substr(start_idx + match_len)
+                              << std::endl;
                 }
+                else if (only_matching)
+                {
+                    std::string_view remaining = input_line;
 
-                if (line_had_match)
-                {
-                    found_any_match = true;
+                    while (!remaining.empty() && find_match(regex, remaining, match))
+                    {
+                        std::cout << match << std::endl;
+
+                        size_t match_start_idx = match.data() - remaining.data();
+                        size_t characters_to_advance = (match.length() == 0) ? 1 : match.length();
+                        remaining = remaining.substr(match_start_idx + characters_to_advance);
+                    }
                 }
-            }
-            else
-            {
-                if (find_match(regex, input_line, match))
+                else
                 {
+                    // Standard grep mode: print the whole line
                     std::cout << input_line << std::endl;
-                    found_any_match = true;
                 }
             }
         }
