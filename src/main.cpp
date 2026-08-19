@@ -53,16 +53,25 @@ int main(int argc, char *argv[])
 
                 if (use_color)
                 {
-                    // C++ Superpower: Pointer arithmetic to find the index of the string_view!
-                    size_t start_idx = match.data() - input_line.data();
-                    size_t match_len = match.length();
+                    std::string_view remaining = input_line;
 
-                    std::cout << input_line.substr(0, start_idx)
-                              << "\033[01;31m"
-                              << match
-                              << "\033[m"
-                              << input_line.substr(start_idx + match_len)
-                              << std::endl;
+                    while (!remaining.empty() && find_match(regex, remaining, match))
+                    {
+
+                        size_t match_start_idx = match.data() - remaining.data();
+
+                        std::cout << remaining.substr(0, match_start_idx);
+
+                        if (match.length() > 0)
+                        {
+                            std::cout << "\033[01;31m" << match << "\033[m";
+                        }
+
+                        size_t characters_to_advance = match_start_idx + (match.length() == 0 ? 1 : match.length());
+                        remaining = remaining.substr(characters_to_advance);
+                    }
+
+                    std::cout << remaining << std::endl;
                 }
                 else if (only_matching)
                 {
@@ -70,16 +79,19 @@ int main(int argc, char *argv[])
 
                     while (!remaining.empty() && find_match(regex, remaining, match))
                     {
-                        std::cout << match << std::endl;
+                        if (match.length() > 0)
+                        {
+                            std::cout << match << std::endl;
+                        }
 
                         size_t match_start_idx = match.data() - remaining.data();
-                        size_t characters_to_advance = (match.length() == 0) ? 1 : match.length();
-                        remaining = remaining.substr(match_start_idx + characters_to_advance);
+                        size_t characters_to_advance = match_start_idx + (match.length() == 0 ? 1 : match.length());
+                        remaining = remaining.substr(characters_to_advance);
                     }
                 }
                 else
                 {
-                    // Standard grep mode: print the whole line
+                    // Standard grep mode: print the whole line unmodified
                     std::cout << input_line << std::endl;
                 }
             }
