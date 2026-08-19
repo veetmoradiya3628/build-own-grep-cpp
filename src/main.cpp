@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <unistd.h>
 #include <stdexcept>
 #include "Parser.h"
 #include "Matcher.h"
@@ -23,6 +24,10 @@ int main(int argc, char *argv[])
         else if (arg == "--color=always")
         {
             use_color = true;
+        }
+        else if (arg == "--color=auto")
+        {
+            use_color = isatty(STDOUT_FILENO);
         }
         else if (arg == "-E" && i + 1 < argc)
         {
